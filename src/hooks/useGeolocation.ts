@@ -19,13 +19,21 @@ export const useGeolocation = () => {
     if (!navigator.geolocation) {
       setState((prev) => ({
         ...prev,
-        error: "Geolocation is not supported by your browser",
+        error: "브라우저가 위치 서비스를 지원하지 않습니다.",
         isLoading: false,
       }));
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    // 위치 추적 옵션
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0,
+    };
+
+    // watchPosition을 사용하여 실시간 위치 추적
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
         setState({
           latitude: position.coords.latitude,
@@ -41,8 +49,11 @@ export const useGeolocation = () => {
           error: error.message,
           isLoading: false,
         });
-      }
+      },
+      options
     );
+
+    return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
   return state;
